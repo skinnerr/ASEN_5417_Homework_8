@@ -1,0 +1,215 @@
+\documentclass[11pt]{article}
+
+\input{../../Latex_Common/skinnerr_latex_preamble_asen5417.tex}
+
+%%
+%% DOCUMENT START
+%%
+
+\begin{document}
+
+\pagestyle{fancyplain}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{\hrule ASEN 5417: Homework 7}
+\cfoot{\hrule \thepage}
+\rfoot{\hrule Ryan Skinner}
+
+\noindent
+{\Large Homework 7}
+\hfill
+{\large Ryan Skinner}
+\\[0.5ex]
+{\large ASEN 5417: Numerical Methods}
+\hfill
+{\large Due 2015/12/1}\\
+\hrule
+\vspace{6pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction} %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Consider the non-linear, inviscid Burgers equation for $u(x,t)$,
+\begin{equation}
+\pp{u}{t} + u \pp{u}{x} = 0
+\;,
+\label{eq:Burgers}
+\end{equation}
+with the initial conditions
+\begin{equation}
+\begin{aligned}
+u(x,0) &= 10 &\quad 0  \le\; &x \le 15 \;, \\
+u(x,0) &= 0  &\quad 30 \le\; &x \le 60 \;.
+\end{aligned}
+\end{equation}
+
+Use the following finite-difference approximations to numerically integrate this equation using appropriate Dirichlet or Neumann BCs on an $x$-grid with $\Delta x = 0.2$:
+\begin{enumerate}
+\item MacCormack explicit method
+\item Beam and Warming implicit method
+\end{enumerate}
+
+Note that the second method  may require the incorporation of a smoothing operator added directly to the finite difference formula. Using a fourth-order artificial viscosity, optimize the coefficient of this operator for minimum amplitude errors,
+\begin{equation}
+D_\epsilon = - \epsilon(\Delta x)^4 \pp{^4 u}{x^4}
+\;,
+\label{eq:D_epsilon}
+\end{equation}
+where the negative sign ensures that positive dissipation is produced. Using central differences, we obtain
+\begin{equation}
+(\Delta x)^4 \pp{^4 u}{x^4} = u_{i-2} -4u_{i-1} +6u_i -4u_{i+1} +u_{i+2}
+\;.
+\end{equation}
+The coefficient $\epsilon$ generally obeys $0 \le \epsilon \le 1/8$, with a preferred value of $\epsilon = 0.1$.
+
+For both methods, plot the solutions at intervals of about two time units up to about $t=8$ time units. Obtain solutions for Courant numbers of $C = \{\tfrac{3}{4}, 1, \tfrac{5}{4}\}$. Comment on the stability of the scheme and dispersive/dissipative errors.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methodology} %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{MacCormack}
+
+We can re-write \eqref{eq:Burgers} as
+\begin{equation}
+\pp{u}{t} = - \pp{F}{x}
+\;, \quad
+\text{where}
+\quad
+F \equiv \frac{u^2}{2}
+\;.
+\end{equation}
+The MacCormack explicit method consists of a predictor and corrector step operating on this equation, using one-sided differences in alternating directions to remove any directional bias from the discretization scheme. The predictor step is
+\begin{equation}
+\hat{u}_i = u_i^n - \frac{\Delta t}{\Delta x} ( F_{i+1}^n - F_{i}^n )
+\;, \quad
+\text{where}
+\quad
+F_i^n \equiv \frac{(u_i^n)^2}{2}
+\;,
+\end{equation}
+and the corrector step is
+\begin{equation}
+u_i^{n+1} = \frac{1}{2} \left[ u_i^n + \hat{u}_i - \frac{\Delta t}{\Delta x} ( \hat{F}_{i}^n - \hat{F}_{i-1}^n ) \right]
+\;, \quad
+\text{where}
+\quad
+\hat{F_i^n} \equiv \frac{(\hat{u}_i^n)^2}{2}
+\;.
+\end{equation}
+
+\subsection{Beam and Warming}
+
+For the Beam and Warming method, the Crank-Nicolson method advances the solution in time and second-order central differences discretize the solution in space. The resulting finite difference equation is non-linear, and Beam and Warming choose to linearize it rather than iterating to find the non-linear solution. The resulting implicit equation can be written as
+\begin{equation}
+\overbrace{\left( \frac{-\Delta t}{\Delta x} \frac{u_{i-1}^n}{4} \right)}^{b_i} u_{i-1}^{n+1}
++ \overbrace{(1)}^{a_i} u_{i}^{n+1}
++ \overbrace{\left( \frac{\Delta t}{\Delta x} \frac{u_{i+1}^n}{4} \right)}^{c_i} u_{i+1}^{n+1}
+=
+\overbrace{
+u_i^n
+- \frac{\Delta t}{2 \Delta x} ( F_{i+1}^n - F_{i-1}^n )
++ \frac{\Delta t}{\Delta x} \left( (u_{i+1}^n)^2 - (u_{i-1}^n)^2 \right)
++ D_\epsilon
+}^{d_i}
+\;,
+\end{equation}
+where the coefficients $a_i$, $b_i$, $c_i$, and $d_i$ correspond to diagonal, sub-diagonal, super-diagonal, and right-hand-side terms in a tri-diagonal matrix system, and $D_\epsilon$ is defined in \eqref{eq:D_epsilon}. The solution vector is obtained via the Thomas algorithm. Further discussion of these topics can be found in Homework 4.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+MacCormack solutions are presented in \figref{fig:MacCormack} for three different Courant numbers.
+
+Beam and Warming results are presented in \figref{fig:BeamWarming_Epsilon} and \figref{fig:BeamWarming}; the former explores the effect of $\epsilon$ on solution behavior, and the latter presents time-dependent results using $\epsilon=0.1$. All three requested Courant numbers are explored.
+
+\begin{figure}[p!]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{Prob1_C075.eps} \\
+\includegraphics[width=0.85\textwidth]{Prob1_C100.eps} \\
+\includegraphics[width=0.85\textwidth]{Prob1_C125.eps} \\
+\includegraphics[width=0.85\textwidth]{Prob1_t8.eps}
+\\[0.5cm]
+\caption{MacCormack method solution for different Courant numbers, and comparison at time $t \sim 8$. The Courant number is seen to substantially affect the accuracy of the results.}
+\label{fig:MacCormack}
+\end{center}
+\end{figure}
+
+\begin{figure}[p!]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{Prob2_eps0125.eps} \vspace*{-0.5cm} \\
+\includegraphics[width=0.85\textwidth]{Prob2_eps0100.eps} \vspace*{-0.5cm} \\
+\includegraphics[width=0.85\textwidth]{Prob2_eps0075.eps} \vspace*{-0.5cm} \\
+\includegraphics[width=0.85\textwidth]{Prob2_eps0050.eps} \vspace*{-0.5cm} \\
+\includegraphics[width=0.85\textwidth]{Prob2_eps0025.eps} \vspace*{-0.5cm} \\
+\includegraphics[width=0.85\textwidth]{Prob2_eps0010.eps} \vspace*{-0.5cm} \\
+\includegraphics[width=0.85\textwidth]{Prob2_eps0001.eps}
+\\[0.5cm]
+\caption{Beam and Warming solution for different values of the dissipation term's coefficient $\epsilon$. Solutions at time $t \sim 8$ are shown for different Courant numbers in each plot. The solution diverged for values of $\epsilon$ even a few percent above 0.125. A value of $\epsilon=0.1$ appears to be sufficient.}
+\label{fig:BeamWarming_Epsilon}
+\end{center}
+\end{figure}
+
+\begin{figure}[p!]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{Prob2_C075.eps} \\
+\includegraphics[width=0.85\textwidth]{Prob2_C100.eps} \\
+\includegraphics[width=0.85\textwidth]{Prob2_C125.eps} \\
+\includegraphics[width=0.85\textwidth]{Prob2_t8.eps}
+\\[0.5cm]
+\caption{Beam and Warming method solution for three Courant numbers, and comparison at time $t \sim 8$. The dissipation coefficient is $\epsilon = 0.1$. Little difference is observed between different Courant numbers.}
+\label{fig:BeamWarming}
+\end{center}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{MacCormack}
+
+It can be shown that the MacCormack method is stable for $C \le 1$. \figref{fig:MacCormack} supports this statement.  As can be seen, when $C=1.25$, numerical instabilities arise that substantially compromise the solution's accuracy as it evolves in time. The solution does not ``blow up'' because the time step is computed dynamically each time step. If $\Delta t$ were fixed based on $u_\tmax = 10$ and $C=1.25$, it the solution would diverge rapidly. Note that this experiment was conducted, though it is not documented in the printed version of the code.
+
+As we would expect, when $C=1$ all frequency components of the solution are propagated  without attenuation, though some minor dissipation and dispersion effects are present. Decreasing the Courant number to $C=0.75$, we observe much stronger dispersion effects, which cause spurious ``ringing'' about the wave front. The effects of dispersion and diffusion are relatively minor compared to the amplitude of the wave for stable Courant numbers for the MacCormack method applied to the inviscid Burgers equation.
+
+\subsection{Beam and Warming}
+
+As discussed in the notes, the Beam and Warming method enjoys unconditional von Neumann stability, but in practice the addition of an artificial viscosity $D_\epsilon$ is necessary to maintain stability. This claim is borne out in the data from \figref{fig:BeamWarming_Epsilon}, in which different values of $\epsilon$ are explored. Numerical dispersion is significant for all values of $\epsilon$ tested, though it can be seen to substantially compromise the solution when $\epsilon \le 0.025$.
+
+Choosing $\epsilon=0.1$ and moving to \figref{fig:BeamWarming}, we see little difference in the solution as the Courant number is varied. For $C=1.25$---which rendered the MacCormack method unstable---stability is maintained, and the solution at $t \sim 8$ is virtually identical to that from $\epsilon=0.75$. For all Courant numbers, the Beam and Warming method exhibits more diffusion and dispersion than the MacCormack method. It would seem that the Beam and Warming method sacrifices an increase in numerical artefacts for stability, whereas the MacCormack method exhibits relatively few artefacts (especially when $C=1$) at the expense of a more stringent time-step requirement.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{References} %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+No external references were used other than the course notes for this assignment.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Appendix: MATLAB Code} %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The following code listings generate all figures presented in this homework assignment. The Thomas algorithm code is not listed, as it is identical to that used in Homework 4.
+
+\includecode{Problem_1.m}
+\includecode{Problem_2.m}
+\includecode{Assemble_BeamWarming.m}
+
+%%
+%% DOCUMENT END
+%%
+\end{document}
