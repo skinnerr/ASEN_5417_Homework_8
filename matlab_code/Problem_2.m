@@ -8,6 +8,10 @@ function [] = Problem_2()
     
     Set_Default_Plot_Properties();
     
+    % Display results from Problem 1 at only a few time steps.
+    n_plot = 11;
+    T_prob1 = Problem_1(n_plot);
+    
     cases = {{'a',5},{'a',6},{'b',5},{'b',6}};
     for case_i = 1:4
             
@@ -18,13 +22,14 @@ function [] = Problem_2()
     nn = 2^n + 1;
     Ly = 2.0;
     y = linspace(0, Ly, nn)';
+    dy = y(2) - y(1);
     
     % Temporal domain.
     dt = 0.001;
     if strcmp(IC_str,'a')
-        t_final = 1;
+        t_final = 4;
     else
-        t_final = 2;
+        t_final = 4;
     end
     t = [0:dt:t_final];
     
@@ -48,13 +53,14 @@ function [] = Problem_2()
     
     for t_n = 1:(length(t)-1)
         
-        T_n = T(:,t_n);
+        Tn = T(:,t_n);
         
-        dTdy   = find_dfdn(  T_n',nn,Ly)';
-        d2Tdy2 = find_d2fdn2(T_n',nn,Ly)';
-        
-        % Update solution.
-        T(:,t_n+1) = T_n + dt * (alpha * d2Tdy2 - v .* dTdy);
+        for i = 1:nn
+            if i == 1 ; Tnim1=Tn(nn); else Tnim1=Tn(i-1); end % Periodic BCs
+            if i == nn; Tnip1=Tn( 1); else Tnip1=Tn(i+1); end % Periodic BCs
+            T(i,t_n+1) = Tn(i) + dt * ( alpha * (Tnip1 - 2*Tn(i) + Tnim1) / (dy^2) ...
+                                       - v(i) * (Tnip1           - Tnim1) / (2*dy) );
+        end
 
     end
 
@@ -62,28 +68,30 @@ function [] = Problem_2()
     % Process results.
     %%%
     
-    n_plot = 31;
-    cmap = jet(n_plot);
     step_numbers = round(linspace(1,length(t),n_plot));
-    hf = figure(case_i);
+    figure(case_i);
+    hold on;
+    for t_n = 2:length(step_numbers)
+        plot(y, T(:,step_numbers(t_n)), 'k--');
+    end
+    
+    cmap = jet(n_plot);
+    hf = figure(length(cases) + case_i);
     set(hf,'Position',[100,500,900,300]);
     hold on;
     plot_handles = [];
-    for t_n = 1:length(step_numbers)
+    for t_n = 2:length(step_numbers)
         tmp = sprintf('t = %.2f', t(step_numbers(t_n)));
-        if t_n == 1
-            hp = plot(y, T(:,step_numbers(t_n)), 'k-.', 'LineWidth', 3, 'DisplayName', tmp);
-        else
-            hp = plot(y, T(:,step_numbers(t_n)), 'DisplayName', tmp, 'Color', cmap(t_n,:));
-        end
-        if(mod(t_n-1,5) == 0)
+        method_err = (T_prob1{case_i}(:,step_numbers(t_n)) - T(:,step_numbers(t_n)));
+        hp = plot(y(2:end-1), method_err(2:end-1), 'DisplayName', tmp, 'Color', cmap(t_n,:));
+        if(mod(t_n-1,5) == 0 || n_plot <= 11)
             plot_handles(end+1) = hp;
         end
     end
     title(sprintf('IC = (%s), n = %.0f',IC_str,n));
     xlabel('y');
-    ylabel('T');
-    ylim([-1,1]);
+    ylabel('T_{Fourier} - T_{FTCS}');
+    ylim([-0.05,0.05]);
     xlim([0,Ly]);
     hleg = legend(plot_handles);
     set(hleg,'Location','eastoutside');

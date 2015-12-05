@@ -1,4 +1,4 @@
-function [] = Problem_1()
+function [T_history] = Problem_1(varargin)
 
     %%%%%%
     % Solves the linear convection-diffusion equation using the Fourier pseudo-spectral
@@ -9,8 +9,18 @@ function [] = Problem_1()
     
     Set_Default_Plot_Properties();
     
+    switch length(varargin)
+        case 0
+            n_plot = 41;
+        case 1
+            n_plot = varargin{1};
+        otherwise
+            error('Too many arguments passed to Problem_1');
+    end
+    
     cases = {{'a',5},{'a',6},{'b',5},{'b',6}};
-    for case_i = 1:4
+    T_history = cell(length(cases),1);
+    for case_i = 1:length(cases)
             
     IC_str = cases{case_i}{1};
          n = cases{case_i}{2};
@@ -23,9 +33,9 @@ function [] = Problem_1()
     % Temporal domain.
     dt = 0.001;
     if strcmp(IC_str,'a')
-        t_final = 1;
+        t_final = 4;
     else
-        t_final = 2;
+        t_final = 4;
     end
     t = [0:dt:t_final];
     
@@ -49,13 +59,13 @@ function [] = Problem_1()
     
     for t_n = 1:(length(t)-1)
         
-        T_n = T(:,t_n);
+        Tn = T(:,t_n);
         
-        dTdy   = find_dfdn(  T_n',nn,Ly)';
-        d2Tdy2 = find_d2fdn2(T_n',nn,Ly)';
+        dTdy   = find_dfdn(  Tn',nn,Ly)';
+        d2Tdy2 = find_d2fdn2(Tn',nn,Ly)';
         
         % Update solution.
-        T(:,t_n+1) = T_n + dt * (alpha * d2Tdy2 - v .* dTdy);
+        T(:,t_n+1) = Tn + dt * (alpha * d2Tdy2 - v .* dTdy);
 
     end
 
@@ -63,7 +73,6 @@ function [] = Problem_1()
     % Process results.
     %%%
     
-    n_plot = 31;
     cmap = jet(n_plot);
     step_numbers = round(linspace(1,length(t),n_plot));
     hf = figure(case_i);
@@ -77,7 +86,7 @@ function [] = Problem_1()
         else
             hp = plot(y, T(:,step_numbers(t_n)), 'DisplayName', tmp, 'Color', cmap(t_n,:));
         end
-        if(mod(t_n-1,5) == 0)
+        if(mod(t_n-1,5) == 0 || n_plot <= 11)
             plot_handles(end+1) = hp;
         end
     end
@@ -88,6 +97,8 @@ function [] = Problem_1()
     xlim([0,Ly]);
     hleg = legend(plot_handles);
     set(hleg,'Location','eastoutside');
+    
+    T_history{case_i} = T;
     
     end
     
