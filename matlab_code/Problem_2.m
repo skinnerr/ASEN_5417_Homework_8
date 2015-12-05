@@ -1,8 +1,7 @@
-function [] = Problem_1()
+function [] = Problem_2()
 
     %%%%%%
-    % Solves the linear convection-diffusion equation using the Fourier pseudo-spectral
-    % method.
+    % Solves the linear convection-diffusion equation using the FTCS explicit method.
     %
     % Ryan Skinner, November 2015
     %%%
