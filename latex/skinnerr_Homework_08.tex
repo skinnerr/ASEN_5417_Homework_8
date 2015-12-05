@@ -1,0 +1,139 @@
+\documentclass[11pt]{article}
+
+\input{../../Latex_Common/skinnerr_latex_preamble_asen5417.tex}
+
+%%
+%% DOCUMENT START
+%%
+
+\begin{document}
+
+\pagestyle{fancyplain}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{\hrule ASEN 5417: Homework 8}
+\cfoot{\hrule \thepage}
+\rfoot{\hrule Ryan Skinner}
+
+\noindent
+{\Large Homework 8}
+\hfill
+{\large Ryan Skinner}
+\\[0.5ex]
+{\large ASEN 5417: Numerical Methods}
+\hfill
+{\large Due 2015/12/8}\\
+\hrule
+\vspace{6pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction} %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Consider the linear convection-diffusion equation
+\begin{equation}
+\pp{T}{t} + v \pp{T}{y} = \frac{1}{\text{Pr}\;\text{Re}} \pp{^2T}{y^2}
+\;, \qquad
+v = \sin(\pi y)
+\;,
+\label{eq:conv-diff}
+\end{equation}
+subject to the initial conditions
+\begin{equation}
+\begin{aligned}
+\text{(a)} && T(y,t=0) &= \cos(2 \pi y) \sin(\pi y) \\
+\text{(b)} && T(y,t=0) &= \cos(2 \pi y)
+\;,
+\end{aligned}
+\end{equation}
+and parameters
+\begin{equation}
+\begin{aligned}
+\text{Re} &= 1 &\quad &\text{(Reynolds number, molten glass)} \\
+\text{Pr} &= 25 &\quad &\text{(Prandtl number, molten glass)} \\
+\Delta t &= 0.001 &\quad &\text{(Time step)} \\
+L_y &= 2 &\quad &\text{(Domain $y$-length)} \\
+N &= 2^n + 1 &\quad &\text{(Number of $y$-points, where $n=5,6$)}
+\;.
+\end{aligned}
+\end{equation}
+
+\subsection{Problem 1}
+
+Use the Fourier pseudo-spectral method to numerically integrate \eqref{eq:conv-diff} with the given parameters. Use the Euler explicit method for time advancement. Higher resolution with $n=6$ will improve the accuracy of the method for the initial condition (a). Plot $T$ as a function of time $t$ at $t = \{0.2, 2, 5, 10\}$.
+
+\subsection{Problem 2}
+
+Use the FTCS Euler explicit method with second-order finite differences for the same computation, and compare results to the Fourier pseudo-spectral method using the same mesh resolution.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methodology} %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Problem 1}
+
+We re-write \eqref{eq:conv-diff} as
+\begin{equation}
+\pp{T}{t} = \frac{1}{\text{Pr}\;\text{Re}} \pp{^2T}{y^2} - v \pp{T}{y} 
+\;, \qquad
+v = \sin(\pi y)
+\;.
+\end{equation}
+The first and second spatial derivatives of $T$ are calculated by taking the Fourier transform of $T$, multiplying the Fourier coefficients by $i k_n$ and $-k_n^2$, respectively, and then taking the inverse Fourier transform. With values of $\partial T / \partial t$ known at all grid points now, values of $T$ at the next time step are calculated using the explicit Euler method,
+\begin{equation}
+T^{n+1} = T^n + \pp{T}{t}
+\;.
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\begin{figure}[p!]
+%\begin{center}
+%\includegraphics[width=0.85\textwidth]{Prob1_C075.eps} \\
+%\includegraphics[width=0.85\textwidth]{Prob1_C100.eps} \\
+%\includegraphics[width=0.85\textwidth]{Prob1_C125.eps} \\
+%\includegraphics[width=0.85\textwidth]{Prob1_t8.eps}
+%\\[0.5cm]
+%\caption{MacCormack method solution for different Courant numbers, and comparison at time $t \sim 8$. The Courant number is seen to substantially affect the accuracy of the results.}
+%\label{fig:MacCormack}
+%\end{center}
+%\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{References} %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+No external references were used other than the course notes for this assignment.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Appendix: MATLAB Code} %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The following code listings generate all figures presented in this homework assignment.
+
+%\includecode{Problem_1.m}
+
+%%
+%% DOCUMENT END
+%%
+\end{document}
