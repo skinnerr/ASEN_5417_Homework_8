@@ -4,7 +4,7 @@ function [T_history] = Problem_1(varargin)
     % Solves the linear convection-diffusion equation using the Fourier pseudo-spectral
     % method.
     %
-    % Ryan Skinner, November 2015
+    % Ryan Skinner, December 2015
     %%%
     
     Set_Default_Plot_Properties();
